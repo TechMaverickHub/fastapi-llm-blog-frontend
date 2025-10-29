@@ -47,7 +47,7 @@ export const BlogForm: React.FC<BlogFormProps> = ({
 
       if (mode === 'create') {
         await blogService.createBlog(data);
-        navigate('/blogs');
+        navigate('/blogs/my');
       } else if (mode === 'edit' && blogId) {
         await blogService.updateBlog(blogId, data);
         navigate(`/blogs/${blogId}`);

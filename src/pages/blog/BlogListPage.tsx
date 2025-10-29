@@ -18,7 +18,7 @@ export const BlogListPage: React.FC<BlogListPageProps> = ({
   const [order, setOrder] = useState<'asc' | 'desc'>('desc');
   const [search, setSearch] = useState('');
   const [searchInput, setSearchInput] = useState('');
-  const perPage = 6; // used by user-blogs endpoint if needed
+  // unified pagination for both all blogs and my blogs
 
   const {
     data,
@@ -30,14 +30,14 @@ export const BlogListPage: React.FC<BlogListPageProps> = ({
       'blogs',
       showUserBlogs ? 'user' : 'all',
       page,
-      showUserBlogs ? perPage : limit,
-      showUserBlogs ? undefined : sortBy,
-      showUserBlogs ? undefined : order,
-      showUserBlogs ? undefined : search,
+      limit,
+      sortBy,
+      order,
+      search,
     ],
     queryFn: () =>
       showUserBlogs
-        ? blogService.getUserBlogs({ page, per_page: perPage })
+        ? blogService.getUserBlogs({ page, limit, sort_by: sortBy, order, search: search || null })
         : blogService.getAllBlogs({ page, limit, sort_by: sortBy, order, search: search || null }),
   });
 
@@ -102,8 +102,7 @@ export const BlogListPage: React.FC<BlogListPageProps> = ({
         </p>
       </div>
 
-      {!showUserBlogs && (
-        <Card className="mb-6">
+      <Card className="mb-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
@@ -162,8 +161,7 @@ export const BlogListPage: React.FC<BlogListPageProps> = ({
               </div>
             </div>
           </div>
-        </Card>
-      )}
+      </Card>
 
       {blogs.length === 0 ? (
         <Card className="text-center py-12">
