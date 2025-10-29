@@ -7,10 +7,10 @@ export const TopicSuggestionsPage: React.FC = () => {
   const navigate = useNavigate();
 
   const handleUseSuggestion = (suggestion: TopicSuggestion) => {
-    // Navigate to create blog page with pre-filled data
+    // Navigate to create blog page with pre-filled title and reference points
     const params = new URLSearchParams({
       title: suggestion.topic,
-      content: suggestion.points.join('\n\n'),
+      points: encodeURIComponent(JSON.stringify(suggestion.points)),
     });
     navigate(`/blogs/create?${params.toString()}`);
   };
