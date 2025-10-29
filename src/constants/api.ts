@@ -12,7 +12,7 @@ export const API_CONFIG = {
       MY: '/blogs/my',
       MY_LIST_FILTER: '/blogs/my-blogs-list-filter',
       CREATE: '/blogs/blog',
-      BY_ID: (id: number) => `/blogs/${id}`,
+      BY_ID: (id: number) => `/blogs/blog/${id}`,
     },
     SUGGESTIONS: {
       TOPICS: '/llm/suggest-topics',

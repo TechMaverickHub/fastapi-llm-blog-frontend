@@ -52,7 +52,7 @@ export const blogService = {
   // Get single blog by ID
   getBlogById: async (id: number): Promise<Blog> => {
     const response = await api.get(API_CONFIG.ENDPOINTS.BLOGS.BY_ID(id));
-    return response.data;
+    return response.data?.results as Blog;
   },
 
   // Create new blog
@@ -64,7 +64,7 @@ export const blogService = {
   // Update blog
   updateBlog: async (id: number, blogData: Partial<CreateBlogRequest>): Promise<Blog> => {
     const response = await api.put(API_CONFIG.ENDPOINTS.BLOGS.BY_ID(id), blogData);
-    return response.data;
+    return response.data?.results as Blog;
   },
 
   // Delete blog

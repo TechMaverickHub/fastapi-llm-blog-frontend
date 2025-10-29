@@ -4,6 +4,7 @@ import { blogService } from '../../services/blogs';
 import { BlogCard } from '../../components/blog/BlogCard';
 import { Card } from '../../components/common/Card';
 import { Button } from '../../components/common/Button';
+import { ConfirmDialog } from '../../components/common/ConfirmDialog';
 
 interface BlogListPageProps {
   showUserBlogs?: boolean;
@@ -41,14 +42,27 @@ export const BlogListPage: React.FC<BlogListPageProps> = ({
         : blogService.getAllBlogs({ page, limit, sort_by: sortBy, order, search: search || null }),
   });
 
-  const handleDelete = async (id: number) => {
-    if (window.confirm('Are you sure you want to delete this blog?')) {
-      try {
-        await blogService.deleteBlog(id);
-        refetch();
-      } catch (error) {
-        console.error('Failed to delete blog:', error);
-      }
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const requestDelete = (id: number) => {
+    setDeleteId(id);
+    setConfirmOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (deleteId == null) return;
+    try {
+      setIsDeleting(true);
+      await blogService.deleteBlog(deleteId);
+      setConfirmOpen(false);
+      setDeleteId(null);
+      refetch();
+    } catch (error) {
+      console.error('Failed to delete blog:', error);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -188,7 +202,7 @@ export const BlogListPage: React.FC<BlogListPageProps> = ({
                 key={blog.id}
                 blog={blog}
                 showActions={showUserBlogs}
-                onDelete={showUserBlogs ? handleDelete : undefined}
+                onDelete={showUserBlogs ? requestDelete : undefined}
               />
             ))}
           </div>
@@ -218,6 +232,16 @@ export const BlogListPage: React.FC<BlogListPageProps> = ({
           )}
         </>
       )}
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Delete Blog"
+        description="Are you sure you want to delete this blog?"
+        confirmText="Delete"
+        cancelText="Cancel"
+        isLoading={isDeleting}
+        onConfirm={confirmDelete}
+        onCancel={() => { if (!isDeleting) { setConfirmOpen(false); setDeleteId(null); } }}
+      />
     </div>
   );
 };
