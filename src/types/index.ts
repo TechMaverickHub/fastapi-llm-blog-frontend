@@ -73,7 +73,7 @@ export interface TopicSuggestion {
 }
 
 export interface TopicSuggestionRequest {
-  keywords: string[];
+  topics: string[];
 }
 
 export interface TopicSuggestionResponse {

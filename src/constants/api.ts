@@ -15,7 +15,7 @@ export const API_CONFIG = {
       BY_ID: (id: number) => `/blogs/${id}`,
     },
     SUGGESTIONS: {
-      TOPICS: '/suggest_topics',
+      TOPICS: '/llm/suggest-topics',
     },
   },
 };

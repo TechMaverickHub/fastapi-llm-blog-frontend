@@ -1,18 +1,8 @@
 import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { suggestionService } from '../../services/suggestions';
 import { type TopicSuggestion } from '../../types';
 import { Button } from '../common/Button';
-import { Input } from '../common/Input';
 import { Card } from '../common/Card';
-
-const keywordSchema = z.object({
-  keywords: z.string().min(1, 'Please enter at least one keyword'),
-});
-
-type KeywordFormData = z.infer<typeof keywordSchema>;
 
 interface TopicSuggestionsProps {
   onUseSuggestion?: (suggestion: TopicSuggestion) => void;
@@ -24,26 +14,32 @@ export const TopicSuggestions: React.FC<TopicSuggestionsProps> = ({
   const [suggestions, setSuggestions] = useState<TopicSuggestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>('');
+  const [topics, setTopics] = useState<string[]>([]);
+  const [input, setInput] = useState('');
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<KeywordFormData>({
-    resolver: zodResolver(keywordSchema),
-  });
+  const addTopicFromInput = () => {
+    const value = input.trim();
+    if (value && !topics.includes(value)) {
+      setTopics([...topics, value]);
+    }
+    setInput('');
+  };
 
-  const onSubmit = async (data: KeywordFormData) => {
+  const removeTopic = (topic: string) => {
+    setTopics(topics.filter(t => t !== topic));
+  };
+
+  const onSubmit = async () => {
     try {
       setIsLoading(true);
       setError('');
-      
-      const keywords = data.keywords
-        .split(',')
-        .map(k => k.trim())
-        .filter(k => k.length > 0);
-      
-      const response = await suggestionService.getTopicSuggestions(keywords);
+
+      if (topics.length === 0) {
+        setError('Please add at least one topic');
+        return;
+      }
+
+      const response = await suggestionService.getTopicSuggestions(topics);
       setSuggestions(response.suggestions);
     } catch (err: any) {
       setError(err.message || 'Failed to get suggestions');
@@ -64,7 +60,7 @@ export const TopicSuggestions: React.FC<TopicSuggestionsProps> = ({
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-gray-900">Topic Suggestions</h1>
           <p className="text-gray-600">
-            Enter keywords separated by commas to get AI-powered blog topic suggestions
+            Add topics as tags to get AI-powered blog topic suggestions
           </p>
         </div>
 
@@ -74,23 +70,51 @@ export const TopicSuggestions: React.FC<TopicSuggestionsProps> = ({
           </div>
         )}
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <Input
-            label="Keywords"
-            {...register('keywords')}
-            error={errors.keywords?.message}
-            placeholder="technology, AI, programming, web development"
-            helperText="Separate multiple keywords with commas"
-          />
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Topics</label>
+            <div className="flex flex-wrap gap-2 mb-2">
+              {topics.map((t) => (
+                <span key={t} className="inline-flex items-center px-2.5 py-1.5 rounded-full text-sm bg-gray-100 text-gray-800">
+                  {t}
+                  <button
+                    type="button"
+                    className="ml-2 text-gray-500 hover:text-gray-700"
+                    onClick={() => removeTopic(t)}
+                    aria-label={`Remove ${t}`}
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ',') {
+                  e.preventDefault();
+                  addTopicFromInput();
+                }
+              }}
+              placeholder="Type a topic and press Enter"
+              className="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+            />
+            <div className="mt-2">
+              <Button type="button" onClick={addTopicFromInput} variant="outline" size="sm">Add Topic</Button>
+            </div>
+          </div>
 
           <Button
-            type="submit"
+            type="button"
+            onClick={onSubmit}
             isLoading={isLoading}
             className="w-full sm:w-auto"
           >
             Get Suggestions
           </Button>
-        </form>
+        </div>
       </Card>
 
       {suggestions.length > 0 && (
