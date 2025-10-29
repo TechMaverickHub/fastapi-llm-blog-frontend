@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -17,6 +18,9 @@ type LoginFormData = z.infer<typeof loginSchema>;
 export const LoginForm: React.FC = () => {
   const { login, isLoading } = useAuth();
   const [error, setError] = useState<string>('');
+  const navigate = useNavigate();
+  const location = useLocation();
+  const from = (location.state as any)?.from?.pathname || '/blogs';
 
   const {
     register,
@@ -30,6 +34,7 @@ export const LoginForm: React.FC = () => {
     try {
       setError('');
       await login(data.email, data.password);
+      navigate(from, { replace: true });
     } catch (err: any) {
       setError(err.message || 'Login failed');
     }

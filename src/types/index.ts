@@ -91,6 +91,10 @@ export interface ApiError {
 export interface PaginationParams {
   page?: number;
   per_page?: number;
+  limit?: number;
+  sort_by?: string;
+  order?: 'asc' | 'desc';
+  search?: string | null;
 }
 
 // Context types

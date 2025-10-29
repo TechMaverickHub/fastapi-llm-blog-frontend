@@ -8,6 +8,7 @@ export const API_CONFIG = {
     },
     BLOGS: {
       ALL: '/blogs',
+      LIST_FILTER: '/blogs/blog-list-filter',
       MY: '/blogs/my',
       CREATE: '/blogs/blog',
       BY_ID: (id: number) => `/blogs/${id}`,

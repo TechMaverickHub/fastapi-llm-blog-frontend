@@ -5,8 +5,25 @@ import { API_CONFIG } from '../constants/api';
 export const blogService = {
   // Get all blogs with pagination
   getAllBlogs: async (params: PaginationParams = {}): Promise<BlogListResponse> => {
-    const response = await api.get(API_CONFIG.ENDPOINTS.BLOGS.ALL, { params });
-    return response.data;
+    const { page, per_page, limit, sort_by, order, search } = params;
+    const backendParams = {
+      page: page ?? 1,
+      limit: per_page ?? limit ?? 10,
+      sort_by: sort_by ?? 'updated_at',
+      order: order ?? 'desc',
+      ...(search != null && search !== '' ? { search } : {}),
+    } as const;
+
+    const response = await api.get(API_CONFIG.ENDPOINTS.BLOGS.LIST_FILTER, { params: backendParams });
+
+    const results = response.data?.results;
+    return {
+      blogs: results?.items ?? [],
+      total: results?.total ?? 0,
+      page: results?.page ?? backendParams.page,
+      per_page: results?.limit ?? backendParams.limit,
+      total_pages: results?.pages ?? 1,
+    };
   },
 
   // Get blogs by current user
